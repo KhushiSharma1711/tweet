@@ -6,37 +6,34 @@
 
 {% block content %}
 <div class="flex flex-col items-center">
-  <h2 class="text-3xl font-bold text-sky-600 underline">ToDo Tasks:</h2>
+  <h2 class="text-3xl font-bold text-sky-400 underline">ToDo Tasks:</h2>
 
   <!-- Add Todo Form -->
   <form method="post" action="{% url 'todos:add' %}" class="flex gap-4 items-center bg-gray-800 p-4 rounded-lg shadow-lg mt-4 w-full max-w-lg justify-center">
     {% csrf_token %}
     <input type="text" name="title" placeholder="Add Your Todo Tasks here" required
-      class="px-4 py-2 rounded-lg bg-gray-700 text-lightblue placeholder-lightblue outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300">
+      class="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300">
     <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-300 shadow-md">
       Add
     </button>
   </form>
 
   <!-- Todo List -->
-  <ul class="mt-6 w-full max-w-lg">
+  <ul id="task-list" class="mt-6 w-full max-w-lg">
     {% for todo in todo_list %}
       <li class="flex justify-between items-center bg-gray-800 p-3 my-2 rounded-lg shadow-md transition-all duration-300 hover:scale-105">
-        <span class="text-lightblue font-medium {% if todo.completed %} line-through text-gray-400 {% endif %}">
+        <input type="checkbox" class="task-checkbox cursor-pointer transform scale-125 mr-2" {% if todo.completed %}checked{% endif %}>
+        <span class="text-white font-medium {% if todo.completed %}line-through text-gray-400{% endif %}">
           {{ todo.title }}
         </span>
         <div class="flex gap-3">
-          <!-- Complete Checkbox -->
-          <input type="checkbox" class="cursor-pointer transform scale-125 mr-2">
-          
           <!-- Edit Button -->
-          <a href="{% url 'todos:edit' todo.id %}" class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold rounded-md transition-all duration-300 shadow-md">
-            Edit
+          <a href="{% url 'todos:edit' todo.id %}" class="text-yellow-400 hover:text-yellow-500 text-xl">
+            <i class="fas fa-pen"></i>
           </a>
-
           <!-- Delete Button -->
-          <a href="{% url 'todos:delete' todo.id %}" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-md transition-all duration-300 shadow-md">
-            Delete
+          <a href="{% url 'todos:delete' todo.id %}" class="text-red-400 hover:text-red-500 text-xl">
+            <i class="fas fa-trash"></i>
           </a>
         </div>
       </li>
@@ -44,3 +41,25 @@
   </ul>
 </div>
 {% endblock %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".task-checkbox").forEach(checkbox => {
+          checkbox.addEventListener("change", function() {
+              let listItem = this.closest("li");
+              let taskList = document.getElementById("task-list");
+              let completedCount = document.getElementById("completed-tasks-count");
+              
+              if (this.checked) {
+                  listItem.classList.add("line-through", "text-gray-400");
+                  taskList.appendChild(listItem);
+                  completedCount.textContent = parseInt(completedCount.textContent) + 1;
+              } else {
+                  listItem.classList.remove("line-through", "text-gray-400");
+                  taskList.insertBefore(listItem, taskList.firstChild);
+                  completedCount.textContent = parseInt(completedCount.textContent) - 1;
+              }
+          });
+      });
+  });
+</script>

@@ -8,25 +8,60 @@
 <div class="container mx-auto mt-10 bg-gray-800 p-6 rounded-lg shadow-lg w-2/3">
     <h2 class="text-2xl font-semibold mb-4 text-sky-400">Edit Todo Task</h2>
     
-    <form method="post" action="{% url 'todos:update' todo.id %}" class="flex flex-col gap-4">
+    <form method="post" action="{% if todo.id %}{% url 'todos:update' todo.id %}{% else %}#{% endif %}" class="flex flex-col gap-4">
         {% csrf_token %}
         
         <input type="text" name="title" value="{{ todo.title }}" required
-            class="px-4 py-2 rounded-lg bg-gray-700 text-lightblue placeholder-lightblue outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300">
+            class="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300">
         
         <div class="flex items-center gap-2">
-            <input type="checkbox" name="completed" {% if todo.completed %}checked{% endif %}>
+            <input type="checkbox" name="completed" class="task-checkbox" {% if todo.completed %}checked{% endif %}>
             <label class="text-white">Mark as Completed</label>
         </div>
 
         <div class="flex gap-4">
-            <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-300 shadow-md">
-                Update
+            <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-300 shadow-md flex items-center gap-2">
+                <i class="fas fa-save"></i> Update
             </button>
-            <a href="{% url 'todos:index' %}" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-all duration-300 shadow-md">
-                Cancel
+            <a href="{% url 'todos:index' %}" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-all duration-300 shadow-md flex items-center gap-2">
+                <i class="fas fa-times"></i> Cancel
             </a>
         </div>
     </form>
 </div>
+
+<!-- Completed Tasks List -->
+<div class="container mx-auto mt-6 bg-gray-800 p-4 rounded-lg shadow-lg w-2/3">
+    <h2 class="text-xl font-semibold text-sky-400">Completed Tasks</h2>
+    <ul id="completed-task-list" class="mt-4">
+        {% for todo in completed_tasks %}
+            <li class="line-through text-gray-400 bg-gray-700 p-2 my-1 rounded-lg">
+                {{ todo.title }}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".task-checkbox").forEach(checkbox => {
+            checkbox.addEventListener("change", function() {
+                let listItem = this.closest("li");
+                let completedTaskList = document.getElementById("completed-task-list");
+                let completedCount = document.getElementById("completed-tasks-count");
+                
+                if (this.checked) {
+                    listItem.classList.add("line-through", "text-gray-400");
+                    completedTaskList.appendChild(listItem);
+                    completedCount.textContent = parseInt(completedCount.textContent) + 1;
+                } else {
+                    listItem.classList.remove("line-through", "text-gray-400");
+                    document.getElementById("task-list").insertBefore(listItem, document.getElementById("task-list").firstChild);
+                    completedCount.textContent = parseInt(completedCount.textContent) - 1;
+                }
+            });
+        });
+    });
+</script>
+

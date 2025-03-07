@@ -2,34 +2,50 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block title %}Todo App{% endblock %}
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Updated Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha384-oC7nQlM7nQ+4C9E3K5UcCxYv5s6z4V6lD8Q5Qc6F1F5xE5n5W5F5D5E5F5D5E5F5" crossorigin="anonymous">
 </head>
-<body class="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-sky-400 text-center min-h-screen flex flex-col">
+<body class="bg-gray-200 text-gray-800 text-center min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-gray-900 p-4 flex justify-between items-center shadow-md">
-        <h1 class="text-3xl font-bold text-sky-400">ToDo APP</h1>
-        <button onclick="toggleAccount()" class="bg-sky-500 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300">
-            Account
+    <nav class="bg-gray-300 p-4 flex justify-between items-center shadow-md">
+        <h1 class="text-3xl font-bold text-sky-600">ToDo APP</h1>
+        <button onclick="toggleAccount()" class="text-gray-800 text-2xl">
+            <i class="fas fa-user-circle"></i>
         </button>
     </nav>
 
-    <!-- Account (Hidden) -->
-    <div id="account-info" class="hidden bg-gray-800 p-6 rounded-lg shadow-lg mt-6 text-white w-1/3 mx-auto">
+    <!-- Account Info -->
+    <div id="account-info" class="hidden bg-gray-100 p-6 rounded-lg shadow-lg mt-6 text-gray-800 w-1/3 mx-auto">
         <h2 class="text-2xl font-semibold mb-2">About User</h2>
         <p class="text-lg"><strong>Username:</strong> {{ user.username }}</p>
         <p class="text-lg"><strong>Email:</strong> {{ user.email }}</p>
-        <p class="text-lg"><strong>Completed Tasks:</strong> {{ completed_tasks_count }}</p>
+        <p class="text-lg"><strong>Completed Tasks:</strong> <span id="completed-tasks-count">{{ completed_tasks_count }}</span></p>
     </div>
 
+    <!-- Reminder Popup -->
+    <div id="reminder-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-gray-100 text-gray-800 p-6 rounded-lg shadow-lg w-1/3 text-center">
+            <h2 class="text-xl font-semibold">Reminder!</h2>
+            <p class="mt-2">It's time to check your tasks!</p>
+            <button onclick="closeReminder()" class="mt-4 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-300 shadow-md">OK</button>
+        </div>
+    </div>
+
+    <!-- Reminder Button -->
+    <button onclick="setReminder()" class="fixed bottom-4 right-4 bg-sky-500 hover:bg-sky-600 text-white text-xl p-4 rounded-full shadow-lg">
+        <i class="fas fa-bell"></i>
+    </button>
+
     <!-- Main Content -->
-    <div class="container mx-auto mt-10 bg-gray-800 p-6 rounded-lg shadow-lg w-2/3">
+    <div class="container mx-auto mt-10 bg-gray-100 p-6 rounded-lg shadow-lg w-2/3">
         {% block content %}
         {% endblock %}
     </div>
@@ -39,7 +55,22 @@
             let accountInfo = document.getElementById("account-info");
             accountInfo.classList.toggle("hidden");
         }
-    </script>
 
+        function showReminder() {
+            document.getElementById("reminder-popup").classList.remove("hidden");
+        }
+
+        function closeReminder() {
+            document.getElementById("reminder-popup").classList.add("hidden");
+        }
+
+        function setReminder() {
+            let time = prompt("Set reminder in minutes:");
+            let ms = parseInt(time) * 60000;
+            if (!isNaN(ms)) {
+                setTimeout(showReminder, ms);
+            }
+        }
+    </script>
 </body>
 </html>
