@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from django.http import HttpResponseBadRequest
 from .models import Todo
+from django.http import JsonResponse
+import json
 
 
 # List all todos
@@ -73,5 +75,21 @@ def update(request, todo_id):
         return redirect('todos:index')  # Redirect to the list view
     
     return render(request, "edit.html", {'todo': todo})
+
+
+    
+def index(request):
+    todo_list = Todo.objects.filter(user=request.user)
+    completed_tasks_count = todo_list.filter(completed=True).count()
+    return render(request, "index.html", {"todo_list": todo_list, "completed_tasks_count": completed_tasks_count})
+
+def update_status(request, task_id):
+    if request.method == "POST":
+        todo = Todo.objects.get(id=task_id, user=request.user)
+        data = json.loads(request.body)
+        todo.completed = data["completed"]
+        todo.save()
+        return JsonResponse({"completed": todo.completed})
+
 
 

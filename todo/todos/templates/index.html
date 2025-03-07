@@ -22,16 +22,16 @@
   <ul id="task-list" class="mt-6 w-full max-w-lg">
     {% for todo in todo_list %}
       <li class="flex justify-between items-center bg-gray-800 p-3 my-2 rounded-lg shadow-md transition-all duration-300 hover:scale-105">
-        <input type="checkbox" class="task-checkbox cursor-pointer transform scale-125 mr-2" {% if todo.completed %}checked{% endif %}>
-        <span class="text-white font-medium {% if todo.completed %}line-through text-gray-400{% endif %}">
+        <input type="checkbox" class="task-checkbox cursor-pointer transform scale-125 mr-2" data-task-id="{{ todo.id }}" {% if todo.completed %}checked{% endif %}>
+        
+        <span class="text-white font-medium {% if todo.completed %}line-through text-gray-400{% endif %}" id="task-{{ todo.id }}">
           {{ todo.title }}
         </span>
+
         <div class="flex gap-3">
-          <!-- Edit Button -->
           <a href="{% url 'todos:edit' todo.id %}" class="text-yellow-400 hover:text-yellow-500 text-xl">
             <i class="fas fa-pen"></i>
           </a>
-          <!-- Delete Button -->
           <a href="{% url 'todos:delete' todo.id %}" class="text-red-400 hover:text-red-500 text-xl">
             <i class="fas fa-trash"></i>
           </a>
@@ -46,19 +46,26 @@
   document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".task-checkbox").forEach(checkbox => {
           checkbox.addEventListener("change", function() {
-              let listItem = this.closest("li");
-              let taskList = document.getElementById("task-list");
+              let taskId = this.getAttribute("data-task-id");
+              let taskItem = document.getElementById("task-" + taskId);
               let completedCount = document.getElementById("completed-tasks-count");
-              
-              if (this.checked) {
-                  listItem.classList.add("line-through", "text-gray-400");
-                  taskList.appendChild(listItem);
-                  completedCount.textContent = parseInt(completedCount.textContent) + 1;
-              } else {
-                  listItem.classList.remove("line-through", "text-gray-400");
-                  taskList.insertBefore(listItem, taskList.firstChild);
-                  completedCount.textContent = parseInt(completedCount.textContent) - 1;
-              }
+
+              fetch(`/todos/update-status/${taskId}/`, {
+                  method: "POST",
+                  headers: {
+                      "X-CSRFToken": "{{ csrf_token }}",
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({ completed: this.checked })
+              }).then(response => response.json()).then(data => {
+                  if (data.completed) {
+                      taskItem.classList.add("line-through", "text-gray-400");
+                      completedCount.textContent = parseInt(completedCount.textContent) + 1;
+                  } else {
+                      taskItem.classList.remove("line-through", "text-gray-400");
+                      completedCount.textContent = parseInt(completedCount.textContent) - 1;
+                  }
+              });
           });
       });
   });
